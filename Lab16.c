@@ -40,7 +40,6 @@ void findTokens(char *str, int length)
 
 	while (i < length)
 	{
-		//получение чисел
 		if (isDigit(str[i]))
 		{
 			token = (TToken*)realloc(token, tokenAmount * sizeof(TToken));
@@ -56,7 +55,6 @@ void findTokens(char *str, int length)
 			tokenAmount++;
 		}
 
-		//получение идентификаторов и ключевых слов
 		else if (isLetter(str[i]))
 		{
 			token = (TToken*)realloc(token, tokenAmount * sizeof(TToken));
@@ -322,7 +320,9 @@ void main()
 {
 	FILE *inFile;
 	char fName[50];
-	inFile = fopen("case.txt", "rt");
+	puts("Enter your file name with code:");
+	gets(fName);
+	inFile = fopen(fName, "rt");
 
 	char str[255];
 
