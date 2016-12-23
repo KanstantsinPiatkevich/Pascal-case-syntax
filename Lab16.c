@@ -5,15 +5,13 @@
 #include <string.h>
 #include <conio.h>
 
-typedef enum {KEY_WORD, ID, NUMBER, SEMICOLON, COLON, RANGE, COMMA, OPERATOR} TClass;
+typedef enum {KEY_WORD, ID, NUMBER, SEMICOLON, COLON, RANGE, COMMA, OPERATOR, END} TClass;
 
 typedef struct
 {
 	TClass tokenClass;
 	char str[20];
 } TToken;
-
-TToken *token;
 
 bool isLetter(char symbol)
 {
@@ -31,10 +29,9 @@ bool isDigit(char symbol)
 		return false;
 }
 
-int tokenAmount = 1;
 bool isError = false;
 
-void findTokens(char *str, int length)
+TToken *findTokens(char *str, int length, TToken *token, int *tokenAmount)
 {
 	int i = 0, j;
 
@@ -42,98 +39,98 @@ void findTokens(char *str, int length)
 	{
 		if (isDigit(str[i]))
 		{
-			token = (TToken*)realloc(token, tokenAmount * sizeof(TToken));
+			token = (TToken*)realloc(token, *tokenAmount * sizeof(TToken));
 			j = 0;
 			while (isDigit(str[i]))
 			{
-				token[tokenAmount - 1].str[j] = str[i];
+				token[*tokenAmount - 1].str[j] = str[i];
 				i++;
 				j++;
 			}
-			token[tokenAmount - 1].str[j] = '\0';
-			token[tokenAmount - 1].tokenClass = NUMBER;
-			tokenAmount++;
+			token[*tokenAmount - 1].str[j] = '\0';
+			token[*tokenAmount - 1].tokenClass = NUMBER;
+			(*tokenAmount)++;
 		}
 
 		else if (isLetter(str[i]))
 		{
-			token = (TToken*)realloc(token, tokenAmount * sizeof(TToken));
+			token = (TToken*)realloc(token, *tokenAmount * sizeof(TToken));
 			j = 0;
 			while (isLetter(str[i]) || isDigit(str[i]) || str[i] == '_')
 			{
-				token[tokenAmount - 1].str[j] = str[i];
+				token[*tokenAmount - 1].str[j] = str[i];
 				i++;
 				j++;
 			}
-			token[tokenAmount - 1].str[j] = '\0';
-			if (strcmp(token[tokenAmount - 1].str, "case") == 0 || strcmp(token[tokenAmount - 1].str, "of") == 0 || strcmp(token[tokenAmount - 1].str, "else") == 0 || strcmp(token[tokenAmount - 1].str, "end") == 0)
-				token[tokenAmount - 1].tokenClass = KEY_WORD;
+			token[*tokenAmount - 1].str[j] = '\0';
+			if (strcmp(token[*tokenAmount - 1].str, "case") == 0 || strcmp(token[*tokenAmount - 1].str, "of") == 0 || strcmp(token[*tokenAmount - 1].str, "else") == 0 || strcmp(token[*tokenAmount - 1].str, "end") == 0)
+				token[*tokenAmount - 1].tokenClass = KEY_WORD;
 			else
-				token[tokenAmount - 1].tokenClass = ID;
-			tokenAmount++;
+				token[*tokenAmount - 1].tokenClass = ID;
+			(*tokenAmount)++;
 		}
 
 		else if (str[i] == ':')
 		{
-			token = (TToken*)realloc(token, tokenAmount * sizeof(TToken));
-			token[tokenAmount - 1].str[0] = ':';
-			token[tokenAmount - 1].str[1] = '\0';
-			token[tokenAmount - 1].tokenClass = COLON;
+			token = (TToken*)realloc(token, *tokenAmount * sizeof(TToken));
+			token[*tokenAmount - 1].str[0] = ':';
+			token[*tokenAmount - 1].str[1] = '\0';
+			token[*tokenAmount - 1].tokenClass = COLON;
 			i++;
 			if (i != length)
 				if (str[i] == '=')
 				{
-					token[tokenAmount - 1].str[1] = '=';
-					token[tokenAmount - 1].str[2] = '\0';
-					token[tokenAmount - 1].tokenClass = OPERATOR;
+					token[*tokenAmount - 1].str[1] = '=';
+					token[*tokenAmount - 1].str[2] = '\0';
+					token[*tokenAmount - 1].tokenClass = OPERATOR;
 					i++;
 				}
-			tokenAmount++;
+			(*tokenAmount)++;
 		}
 
 		else if (str[i] == '+' || str[i] == '-' || str[i] == '/' || str[i] == '*' || str[i] == '=')
 		{
-			token = (TToken*)realloc(token, tokenAmount * sizeof(TToken));
-			token[tokenAmount - 1].str[0] = str[i];
-			token[tokenAmount - 1].str[1] = '\0';
-			token[tokenAmount - 1].tokenClass = OPERATOR;
-			tokenAmount++;
+			token = (TToken*)realloc(token, *tokenAmount * sizeof(TToken));
+			token[*tokenAmount - 1].str[0] = str[i];
+			token[*tokenAmount - 1].str[1] = '\0';
+			token[*tokenAmount - 1].tokenClass = OPERATOR;
+			(*tokenAmount)++;
 			i++;
 		}
 
 		else if (str[i] == '.')
 		{
-			token = (TToken*)realloc(token, tokenAmount * sizeof(TToken));
+			token = (TToken*)realloc(token, *tokenAmount * sizeof(TToken));
 			i++;
 			if (i != length)
 				if (str[i] == '.')
 				{
-					token[tokenAmount - 1].str[0] = '.';
-					token[tokenAmount - 1].str[1] = '.';
-					token[tokenAmount - 1].str[2] = '\0';
-					token[tokenAmount - 1].tokenClass = RANGE;
+					token[*tokenAmount - 1].str[0] = '.';
+					token[*tokenAmount - 1].str[1] = '.';
+					token[*tokenAmount - 1].str[2] = '\0';
+					token[*tokenAmount - 1].tokenClass = RANGE;
 					i++;
 				}
-			tokenAmount++;
+			(*tokenAmount)++;
 		}
 
 		else if (str[i] == ';')
 		{
-			token = (TToken*)realloc(token, tokenAmount * sizeof(TToken));
-			token[tokenAmount - 1].str[0] = str[i];
-			token[tokenAmount - 1].str[1] = '\0';
-			token[tokenAmount - 1].tokenClass = SEMICOLON;
-			tokenAmount++;
+			token = (TToken*)realloc(token, *tokenAmount * sizeof(TToken));
+			token[*tokenAmount - 1].str[0] = str[i];
+			token[*tokenAmount - 1].str[1] = '\0';
+			token[*tokenAmount - 1].tokenClass = SEMICOLON;
+			(*tokenAmount)++;
 			i++;
 		}
 
 		else if (str[i] == ',')
 		{
-			token = (TToken*)realloc(token, tokenAmount * sizeof(TToken));
-			token[tokenAmount - 1].str[0] = str[i];
-			token[tokenAmount - 1].str[1] = '\0';
-			token[tokenAmount - 1].tokenClass = COMMA;
-			tokenAmount++;
+			token = (TToken*)realloc(token, *tokenAmount * sizeof(TToken));
+			token[*tokenAmount - 1].str[0] = str[i];
+			token[*tokenAmount - 1].str[1] = '\0';
+			token[*tokenAmount - 1].tokenClass = COMMA;
+			(*tokenAmount)++;
 			i++;
 		}
 
@@ -148,9 +145,16 @@ void findTokens(char *str, int length)
 			isError = true;
 		}
 	}
+
+	token = (TToken*)realloc(token, *tokenAmount * sizeof(TToken));
+	token[*tokenAmount - 1].tokenClass = END;
+	token[*tokenAmount - 1].str[0] = '$';
+	token[*tokenAmount - 1].str[1] = '\0';
+
+	return token;
 }
 
-bool checkExpession(int &i)
+bool checkExpession(int &i, TToken *token)
 {
 	int rang = 0;
 
@@ -161,8 +165,6 @@ bool checkExpession(int &i)
 		else
 			rang -= 1;
 		i++;
-		if (i == tokenAmount - 1)
-			return false;
 	}
 
 	if (rang != 1)
@@ -171,7 +173,7 @@ bool checkExpession(int &i)
 		return true;
 }
 
-bool checkCorrectness()
+bool checkCorrectness(TToken *token, int *tokenAmount)
 {
 	bool isLoop;
 
@@ -182,13 +184,7 @@ bool checkCorrectness()
 
 	int i = 1;
 
-	if (i == tokenAmount - 1)
-		return false;
-
-	if (!checkExpession(i))
-		return false;
-	
-	if (i == tokenAmount - 1)
+	if (!checkExpession(i, token))
 		return false;
 
 	if (strcmp(token[i].str, "of") != 0)
@@ -200,31 +196,19 @@ bool checkCorrectness()
 		{
 			i++;
 
-			if (i == tokenAmount - 1)
-				return false;
-
 			if (token[i].tokenClass != NUMBER)
 				return false;
 
 			i++;
 
-			if (i == tokenAmount - 1)
-				return false;
-
 			if (token[i].tokenClass == RANGE)
 			{
 				i++;
-
-				if (i == tokenAmount - 1)
-					return false;
 
 				if (token[i].tokenClass != NUMBER)
 					return false;
 				
 				i++;
-
-				if (i == tokenAmount - 1)
-					return false;
 
 			}
 		} while (token[i].tokenClass == COMMA);
@@ -233,30 +217,21 @@ bool checkCorrectness()
 
 		i++;
 
-		if (i == tokenAmount - 1)
-			return false;
-
 		if (token[i].tokenClass != ID)
 			return false;
 		
 		i++;
-		
-		if (i == tokenAmount - 1)
-			return false;
 		
 		if (strcmp(token[i].str, ":=") != 0)
 			return false;
 		
 		i++;
 
-		if (i == tokenAmount - 1)
-			return false;
-
-		if (!checkExpession(i))
+		if (!checkExpession(i, token))
 			return false;
 
 		isLoop = false;
-		if (i < tokenAmount - 2)
+		if (i < *tokenAmount - 2)
 			if (token[i].tokenClass == SEMICOLON && token[i + 1].tokenClass == NUMBER)
 				isLoop = true;
 	} while (isLoop);
@@ -266,63 +241,44 @@ bool checkCorrectness()
 	else if (strcmp(token[i].str, "else") != 0)
 		return false;
 
-	if (i == tokenAmount - 1)
-		return false;
-
 	if (strcmp(token[i].str, "else") == 0)
 	{
 		i++;
-
-		if (i == tokenAmount - 1)
-			return false;
 
 		if (token[i].tokenClass != ID)
 			return false;
 		
 		i++;
 
-		if (i == tokenAmount - 1)
-			return false;
-
 		if (strcmp(token[i].str, ":=") != 0)
 			return false;
 		
 		i++;
-		
-		if (i == tokenAmount - 1)
-			return false;
 
-		if (!checkExpession(i))
+		if (!checkExpession(i, token))
 			return false;
 
 		if (token[i].tokenClass == SEMICOLON)
 			i++;
-		
-		if (i == tokenAmount - 1)
-			return false;
 	}
 
 	if (strcmp(token[i].str, "end") != 0)
 		return false;
 	i++;
 		
-	if (i == tokenAmount - 1)
-		return false;
-		
 	if (strcmp(token[i].str, ";") != 0)
 		return false;
 
 	return true;
-
 }
 
 void main()
 {
+	TToken *token = NULL;
+	int tokenAmount = 1;
 	FILE *inFile;
 	char fName[50];
-	puts("Enter your file name with code:");
-	gets(fName);
-	inFile = fopen(fName, "rt");
+	inFile = fopen("case.txt", "rt");
 
 	char str[255];
 
@@ -332,11 +288,11 @@ void main()
 		fgets(str, 255, inFile);
 
 		printf("%s", str);
-		findTokens(str, strlen(str));
+		token = findTokens(str, strlen(str), token, &tokenAmount);
 	}
 	if (isError)
 		puts("\n\nError: Unknown character in code");
-	else if (checkCorrectness())
+	else if (checkCorrectness(token, &tokenAmount))
 	{
 		puts("\n\nToken's list:\n");
 		for (int i = 0; i < tokenAmount - 1; i++)
